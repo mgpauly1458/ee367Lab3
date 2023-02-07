@@ -12,6 +12,23 @@
 
 // Server
 
+char* receive_text_data(int fd) {
+   char buffer[1024];
+   int bytes_received;
+   char *result = malloc(1);
+   result[0] = '\0';
+   while ((bytes_received = recv(fd, buffer, sizeof(buffer, 0))) > 0) {
+         int result_len = strlen(result);
+         int bytes_len = strlen(buffer);
+         result = realloc(result, result_len + bytes_len + 1);
+         strcat(result, buffer);
+         memset(buffer, 0, sizeof(buffer));
+      }
+   return result;
+}
+
+// Client
+
 void exec_ls(int fd) {
    FILE *fp;
    char path[1035];
@@ -23,61 +40,24 @@ void exec_ls(int fd) {
    }
 
    while (fgets(path, sizeof(path)-1, fp) != NULL) {
-      int bytes = write(fd, path, strlen(path));
-      printf("bytes=%d errno=%s\n", bytes, strerror(errno));
+      write(fd, path, strlen(path));
    }
 
    pclose(fp);
 }
 
-
-void readListContents(int fd) {
-   FILE* fp = fdopen(fd, "r");
-   char buff[BUFF_SIZE];
-   while (fgets(buff, sizeof(buff), fp) != NULL) {
-      printf("%s", buff);
+void send_text_data(int fd, char *data) {
+   int bytes_sent;
+   int data_len = strlen(data);
+   int bytes_left = data_len;
+   while (bytes_left > 0) {
+      bytes_sent = send(fd, data, bytes_left, 0);
+      if (bytes_sent == -1) {
+         perror("send");
+         break;
+      }
+      bytes_left -= bytes_sent;
+      data += bytes_sent;
    }
 }
-
-int getFileSize(int fd) {
-   struct stat file_stat;
-   if (fstat(fd, &file_stat) < 0) {
-      fprintf(stderr, "Error fstat ---> %s", strerror(errno));
-      exit(EXIT_FAILURE);
-   }
-   int fileSize = file_stat.st_size;
-   printf("fileSize=%d fd=%d\n\n", fileSize, fd);
-
-   return fileSize;
-}
-
-// Client
-/*
-int main(int argc, char *argv[]) {
-   
-
-   int fd[2];
-   pipe(fd);
-
-   //child
-   if (!fork()) {
-      close(fd[0]);   
-
-     exec_ls(fd[1]); 
-      
-      close(fd[1]);
-      exit(0);
-   }
-   
-   //parent
-   close(fd[1]);
-   wait(NULL);
-   FILE* fp = fdopen(fd[0], "r");
-   readListContents(fp);
-  
-   close(fd[0]);
-   return 0;
-}
-*/
-
 

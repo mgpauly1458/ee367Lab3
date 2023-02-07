@@ -129,14 +129,19 @@ int main(void)
 		printf("server: got connection from %s\n", s);
       
       // connection is good, add functionality here:
-      int fd[2];
-      pipe(fd);
 
       // child
 		if (!fork()) {
 			close(sockfd); // child close listener
-			exec_ls(new_fd);
+			char buffer[1035];
+         int bytes_received;
 
+         if ((bytes_received = recv(new_fd, buffer, BUFFER_SIZE, 0)) < 0) {
+            perror("recv");
+         }
+
+         printf("\nserver recieved: %s\n", buffer);
+         
          // close socket, kill process
 			close(new_fd);
 			exit(0);

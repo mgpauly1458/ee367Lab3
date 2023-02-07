@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	}
 
 	// get socket and connect to server
-   for(p = servinfo; p != NULL; p = p->ai_next) {
+  for(p = servinfo; p != NULL; p = p->ai_next) {
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
 				p->ai_protocol)) == -1) {
 			perror("client: socket");
@@ -83,12 +83,12 @@ int main(int argc, char *argv[])
 	freeaddrinfo(servinfo);
    
    // connected, add funcitonality here
-         
-	}
-
-	buf[numbytes] = '\0';
-
-	printf("client: received '%s'\n",buf);
+   char message[BUFFER_SIZE] = "Hello\0";
+   int bytes_sent;
+   if ((bytes_sent = send(sockfd, message, strlen(message) + 1, 0)) < 0) {
+      perror("send");
+   }
+      
 
 	close(sockfd);
 
