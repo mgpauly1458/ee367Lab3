@@ -1,5 +1,7 @@
 #define BUFFER_SIZE 1035
 
+void receive_command(int);
+void send_command(int);
 void send_ls_output(int);
 void receive_ls_output(int);
 void readListContents(int);

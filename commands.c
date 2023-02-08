@@ -85,4 +85,37 @@ void receive_ls_output(int socket_fd) {
    }
 }
 
+void send_command(int socket_fd) {
+   char buffer[BUFFER_SIZE];
+   printf("Enter Command: ");
+   fgets(buffer, sizeof(buffer), stdin);
+
+   int bytes_sent;
+   if ((bytes_sent = send(socket_fd, buffer, strlen(buffer), 0)) < 0) {
+      perror("send");
+      exit(1);
+   }
+
+   if (strcmp(buffer, "l\n") == 0) {
+      receive_ls_output(socket_fd);
+      return;
+   }
+}
+
+void receive_command(int socket_fd) {
+   char buffer[BUFFER_SIZE];
+   int bytes_received;
+   if ((bytes_received = recv(socket_fd, buffer, sizeof(buffer), 0)) < 0) {
+      perror("recv");
+      exit(1);
+   }
+   buffer[bytes_received] = '\0';
+
+   if (strcmp(buffer, "l\n") == 0) {
+      send_ls_output(socket_fd);
+      return;
+   }
+
+   printf("Received command: %s", buffer);
+}
 
