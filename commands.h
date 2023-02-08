@@ -1,5 +1,6 @@
 #define BUFFER_SIZE 1035
 
+int is_file_in_current_directory(char*);
 void receive_command(int);
 void send_command(int);
 void send_ls_output(int);

@@ -36,7 +36,11 @@ int main(int argc, char *argv[])
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
 	char s[INET6_ADDRSTRLEN];
-   
+  
+   // test functions
+
+
+
    // get host name
 	if (argc != 2) {
 	    fprintf(stderr,"usage: client hostname\n");

@@ -76,6 +76,20 @@ void send_ls_output(int socket_fd) {
    pclose(fp);
 }
 
+int is_file_in_current_directory(char *filename) {
+   char cwd[1024];
+   if (getcwd(cwd, sizeof(cwd)) != NULL) {
+      char path[1024];
+      sprintf(path, "%s/%s", cwd, filename);
+      FILE *file = fopen(path, "r");
+      if (file) {
+         fclose(file);
+         return 1;
+      }
+   }
+   return 0;
+}
+
 void receive_ls_output(int socket_fd) {
    char buffer[BUFFER_SIZE];
    int bytes_received;
@@ -84,6 +98,8 @@ void receive_ls_output(int socket_fd) {
       printf("%s", buffer);
    }
 }
+
+// Client
 
 void send_command(int socket_fd) {
    char buffer[BUFFER_SIZE];
@@ -100,7 +116,20 @@ void send_command(int socket_fd) {
       receive_ls_output(socket_fd);
       return;
    }
+
+   if (strncmp(buffer, "c ", 2) == 0) {
+      char message[BUFFER_SIZE];
+      int bytes_received;
+      if ((bytes_received = recv(socket_fd, message, sizeof(message), 0)) < 0) {
+         perror("recv");
+      }
+      message[bytes_received] = '\0';
+      printf("%s\n", message);
+      return;
+   }
 }
+
+// Server
 
 void receive_command(int socket_fd) {
    char buffer[BUFFER_SIZE];
@@ -116,6 +145,25 @@ void receive_command(int socket_fd) {
       return;
    }
 
+   if (strncmp(buffer, "c ", 2) == 0) {
+      char filename[BUFFER_SIZE];
+      sscanf(buffer, "c %s", filename);
+      if (is_file_in_current_directory(filename)) {
+         char message[BUFFER_SIZE];
+         sprintf(message, "File '%s' exists\n", filename);
+         send(socket_fd, message, strlen(message), 0);
+      } else {
+         char message[BUFFER_SIZE];
+         sprintf(message, "File '%s' not found\n", filename);
+         send(socket_fd, message, strlen(message), 0);
+      }
+      return;
+   }
+   
+
    printf("Received command: %s", buffer);
 }
+
+
+
 
