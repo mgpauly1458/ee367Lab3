@@ -8,7 +8,7 @@
 #include <string.h>
 #include <fcntl.h>
 
-#define BUFF_SIZE 1000
+#include "commands.h"
 
 // Server
 
@@ -60,4 +60,29 @@ void send_text_data(int fd, char *data) {
       data += bytes_sent;
    }
 }
+
+void send_ls_output(int socket_fd) {
+   FILE *fp;
+   if ((fp = popen("ls", "r")) == NULL) {
+      perror("popen");
+      exit(1);
+   }
+
+   char buffer[BUFFER_SIZE];
+   while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+      send(socket_fd, buffer, strlen(buffer), 0);
+   }
+
+   pclose(fp);
+}
+
+void receive_ls_output(int socket_fd) {
+   char buffer[BUFFER_SIZE];
+   int bytes_received;
+   while ((bytes_received = recv(socket_fd, buffer, sizeof(buffer), 0)) > 0) {
+      buffer[bytes_received] = '\0';
+      printf("%s", buffer);
+   }
+}
+
 

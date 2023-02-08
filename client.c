@@ -83,12 +83,7 @@ int main(int argc, char *argv[])
 	freeaddrinfo(servinfo);
    
    // connected, add funcitonality here
-   char message[BUFFER_SIZE] = "Hello\0";
-   int bytes_sent;
-   if ((bytes_sent = send(sockfd, message, strlen(message) + 1, 0)) < 0) {
-      perror("send");
-   }
-      
+   receive_ls_output(sockfd);      
 
 	close(sockfd);
 

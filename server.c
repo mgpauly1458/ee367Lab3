@@ -133,15 +133,9 @@ int main(void)
       // child
 		if (!fork()) {
 			close(sockfd); // child close listener
-			char buffer[1035];
-         int bytes_received;
+			
+         send_ls_output(new_fd);
 
-         if ((bytes_received = recv(new_fd, buffer, BUFFER_SIZE, 0)) < 0) {
-            perror("recv");
-         }
-
-         printf("\nserver recieved: %s\n", buffer);
-         
          // close socket, kill process
 			close(new_fd);
 			exit(0);
