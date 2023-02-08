@@ -133,8 +133,7 @@ int main(void)
       // child
 		if (!fork()) {
 			close(sockfd); // child close listener
-			
-         send_ls_output(new_fd);
+			receive_command(new_fd);
 
          // close socket, kill process
 			close(new_fd);

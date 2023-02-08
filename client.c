@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 	freeaddrinfo(servinfo);
    
    // connected, add funcitonality here
-   receive_ls_output(sockfd);      
+   send_command(sockfd);      
 
 	close(sockfd);
 
