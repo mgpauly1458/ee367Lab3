@@ -101,6 +101,7 @@ void receive_ls_output(int socket_fd) {
 
 // Client
 
+
 void send_command(int socket_fd) {
    char buffer[BUFFER_SIZE];
    printf("Enter Command: ");
@@ -139,7 +140,23 @@ void send_command(int socket_fd) {
       printf("%s\n", message);
       return;
    }
-}
+
+   if (strncmp(buffer, "d ", 2) ==0) {    
+      char filename[BUFFER_SIZE];
+      sscanf(buffer, "d %s", filename);
+      if (is_file_in_current_directory(filename)) {
+         char response;
+         printf("File '%s' already exists, would you like to overwrite it (y/n)? ", filename);
+         scanf(" %c", &response);
+
+         if (response != 'y') {
+            printf("File not overwritten\n");
+            return;
+         }
+      }
+   }
+}      
+
 
 // Server
 
