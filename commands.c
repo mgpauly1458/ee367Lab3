@@ -127,6 +127,18 @@ void send_command(int socket_fd) {
       printf("%s\n", message);
       return;
    }
+
+   if (strncmp(buffer, "p ", 2) ==0) {
+      char message[BUFFER_SIZE];
+      int bytes_received;
+      if ((bytes_received = recv(socket_fd, message, sizeof(message), 0)) < 0) {
+         perror("recv");
+         exit(1);
+      }
+      message[bytes_received] = "\0";
+      printf("%s\n", message);
+      return;
+   }
 }
 
 // Server
@@ -160,6 +172,24 @@ void receive_command(int socket_fd) {
       return;
    }
    
+   if (strncmp(buffer, "p ", 2) == 0) {
+      char filename[BUFFER_SIZE];
+      sscanf(buffer, "p %s", filename);
+      FILE *file = fopen(filename, "r");
+      if (file != NULL) {
+         char contents[BUFFER_SIZE];
+         size_t read_size;
+         while ((read_size = fread(contents, 1, sizeof(contents), file)) > 0) {
+            send(socket_fd, contents, read_size, 0);
+         }
+         fclose(file);
+      } else {
+         char message[BUFFER_SIZE];
+         sprintf(message, "File '%s' not found\n", filename);
+         send(socket_fd, message, strlen(message), 0);
+      }
+      return;
+   }
 
    printf("Received command: %s", buffer);
 }
