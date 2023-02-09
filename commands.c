@@ -99,6 +99,30 @@ void receive_ls_output(int socket_fd) {
    }
 }
 
+void receive_file(int sock, char *filename) {
+   char response[7];
+   int bytes_received = recv(sock, response, 7, 0);
+   response[bytes_received] = '\0';
+
+   if (strcmp(response, "deny") == 0) {
+      printf("File '%s' not found\n", filename);
+      return;
+   }
+
+   FILE *fp = fopen(filename, "wb");
+   if (fp == NULL) {
+      perror("fopen");
+      return;
+   }
+
+   char buffer[BUFFER_SIZE];
+   while ((bytes_received = recv(sock, buffer, sizeof(buffer), 0)) > 0) {
+      fwrite(buffer, 1, bytes_received, fp);
+   }
+
+   fclose(fp);
+}
+
 // Client
 
 
@@ -154,6 +178,11 @@ void send_command(int socket_fd) {
             return;
          }
       }
+
+      // recieve response
+      char response[BUFFER_SIZE];
+      recv(socket_fd, response, sizeof(response), 0);
+      printf("client response=%s\n", response);
    }
 }      
 
@@ -205,6 +234,45 @@ void receive_command(int socket_fd) {
          sprintf(message, "File '%s' not found\n", filename);
          send(socket_fd, message, strlen(message), 0);
       }
+      return;
+   }
+   
+   if (strncmp(buffer, "d ", 2) == 0) {
+      char filename[BUFFER_SIZE];
+      sscanf(buffer, "d %s", filename);
+      char response[BUFFER_SIZE];
+
+      if (!is_file_in_current_directory(filename)) {
+         strcpy(response, "deny\0");
+         send(socket_fd, response, strlen(response), 0);
+         return;
+      }
+
+      strcpy(response, "confirm\0");
+      send(socket_fd, response, strlen(response), 0);
+      
+      struct stat st;
+      if (stat(filename, &st) == -1) {
+         return -1;
+      }
+
+      int fd = open(filename, O_RDONLY);
+      if (fd == -1) {
+         perror("open");
+         return -1;
+      }
+
+      off_t offset = 0;
+      while (offset < st.st_size) {
+         ssize_t bytes_sent = sendfile(socket_fd, fd, &offset, st.st_size - offset);
+         if (bytes_sent == -1) {
+            perror("sendfile");
+            close(fd);
+            return -1;
+         }
+      }
+
+      close(fd);
       return;
    }
 
