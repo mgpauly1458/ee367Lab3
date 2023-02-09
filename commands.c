@@ -123,6 +123,15 @@ void receive_file(int sock, char *filename) {
    fclose(fp);
 }
 
+void send_message(int socket_fd, char *message) {
+   int bytes_sent;
+   if ((bytes_sent = send(socket_fd, message, strlen(message), 0)) < 0) {
+      perror("send");
+      exit(1);
+   }
+   return;
+}
+
 // Client
 
 
@@ -131,18 +140,14 @@ void send_command(int socket_fd) {
    printf("Enter Command: ");
    fgets(buffer, sizeof(buffer), stdin);
 
-   int bytes_sent;
-   if ((bytes_sent = send(socket_fd, buffer, strlen(buffer), 0)) < 0) {
-      perror("send");
-      exit(1);
-   }
-
    if (strcmp(buffer, "l\n") == 0) {
+      send_message(socket_fd, buffer);
       receive_ls_output(socket_fd);
       return;
    }
 
    if (strncmp(buffer, "c ", 2) == 0) {
+      send_message(socket_fd, buffer);
       char message[BUFFER_SIZE];
       int bytes_received;
       if ((bytes_received = recv(socket_fd, message, sizeof(message), 0)) < 0) {
@@ -154,6 +159,7 @@ void send_command(int socket_fd) {
    }
 
    if (strncmp(buffer, "p ", 2) ==0) {
+      send_message(socket_fd, buffer);
       char message[BUFFER_SIZE];
       int bytes_received;
       if ((bytes_received = recv(socket_fd, message, sizeof(message), 0)) < 0) {
@@ -178,11 +184,9 @@ void send_command(int socket_fd) {
             return;
          }
       }
-
-      // recieve response
-      char response[BUFFER_SIZE];
-      recv(socket_fd, response, sizeof(response), 0);
-      printf("client response=%s\n", response);
+      
+      send_message(socket_fd, buffer);
+      receive_file(socket_fd, filename); 
    }
 }      
 

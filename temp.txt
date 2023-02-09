@@ -1,9 +1,0 @@
-a.out
-client.c
-commands.c
-file1.txt
-file2.txt
-file3.txt
-server.c
-temp.txt
-test.sh
