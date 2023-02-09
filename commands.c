@@ -233,7 +233,6 @@ void receive_command(int socket_fd) {
       return;
    }
   
-   // @todo rogue 'u' placed whenever a read is send or not sent only when client is run in same dir as server??
    if (strncmp(buffer, "p ", 2) == 0) {
       char filename[BUFFER_SIZE];
       sscanf(buffer, "p %s", filename);
@@ -248,7 +247,7 @@ void receive_command(int socket_fd) {
       } else {
          char message[BUFFER_SIZE];
          sprintf(message, "File '%s' not found\n\0", filename);
-         send(socket_fd, message, strlen(message), 0);
+         send(socket_fd, message, sizeof(message), 0);
       }
       return;
    }
