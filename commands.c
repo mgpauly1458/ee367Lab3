@@ -140,6 +140,12 @@ void send_command(int socket_fd) {
    printf("Enter Command: ");
    fgets(buffer, sizeof(buffer), stdin);
 
+   if (strcmp(buffer, "h\n") == 0) {
+      printf("l: List\nc: Check <file name>\np: Display <filename>\n");
+      printf("d: Download <filename>\nq: Quit\nh: Help\n");
+      return;
+   }
+
    if (strcmp(buffer, "l\n") == 0) {
       send_message(socket_fd, buffer);
       receive_ls_output(socket_fd);
@@ -257,13 +263,13 @@ void receive_command(int socket_fd) {
       
       struct stat st;
       if (stat(filename, &st) == -1) {
-         return -1;
+         return;
       }
 
       int fd = open(filename, O_RDONLY);
       if (fd == -1) {
          perror("open");
-         return -1;
+         return;
       }
 
       off_t offset = 0;
@@ -272,7 +278,7 @@ void receive_command(int socket_fd) {
          if (bytes_sent == -1) {
             perror("sendfile");
             close(fd);
-            return -1;
+            return;
          }
       }
 
