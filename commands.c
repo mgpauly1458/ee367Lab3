@@ -247,7 +247,7 @@ void receive_command(int socket_fd) {
          fclose(file);
       } else {
          char message[BUFFER_SIZE];
-         sprintf(message, "File '%s' not found\n", filename);
+         sprintf(message, "File '%s' not found\n\0", filename);
          send(socket_fd, message, strlen(message), 0);
       }
       return;
