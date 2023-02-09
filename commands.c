@@ -135,21 +135,25 @@ void send_message(int socket_fd, char *message) {
 // Client
 
 
-void send_command(int socket_fd) {
+int send_command(int socket_fd) {
    char buffer[BUFFER_SIZE];
    printf("Enter Command: ");
    fgets(buffer, sizeof(buffer), stdin);
 
+   if (strcmp(buffer, "q\n") == 0) {
+      return 1;
+   }
+
    if (strcmp(buffer, "h\n") == 0) {
       printf("l: List\nc: Check <file name>\np: Display <filename>\n");
       printf("d: Download <filename>\nq: Quit\nh: Help\n");
-      return;
+      return 0;
    }
 
    if (strcmp(buffer, "l\n") == 0) {
       send_message(socket_fd, buffer);
       receive_ls_output(socket_fd);
-      return;
+      return 0;
    }
 
    if (strncmp(buffer, "c ", 2) == 0) {
@@ -161,7 +165,7 @@ void send_command(int socket_fd) {
       }
       message[bytes_received] = '\0';
       printf("%s\n", message);
-      return;
+      return 0;
    }
 
    if (strncmp(buffer, "p ", 2) ==0) {
@@ -174,7 +178,7 @@ void send_command(int socket_fd) {
       }
       message[bytes_received] = "\0";
       printf("%s\n", message);
-      return;
+      return 0;
    }
 
    if (strncmp(buffer, "d ", 2) ==0) {    
@@ -187,13 +191,14 @@ void send_command(int socket_fd) {
 
          if (response != 'y') {
             printf("File not overwritten\n");
-            return;
+            return 0;
          }
       }
       
       send_message(socket_fd, buffer);
       receive_file(socket_fd, filename); 
    }
+   return 0;
 }      
 
 
